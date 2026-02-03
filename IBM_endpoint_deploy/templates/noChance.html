@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Rain Predicted - Rainfall Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .result-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .result-title {
+            color: #FFC107;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .result-description {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .probability-box {
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .probability-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .probability-value {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .probability-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            animation: fillBar 1s ease-out forwards;
+        }
+        
+        @keyframes fillBar {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        .comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .comparison-item {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #FFC107;
+        }
+        
+        .comparison-item.rain {
+            border-left-color: #2196F3;
+        }
+        
+        .comparison-item-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .comparison-item-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .info-banner {
+            background: #FFF3E0;
+            border-left: 4px solid #FFC107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            color: #E65100;
+            text-align: left;
+        }
+        
+        .info-banner h3 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .info-banner p {
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .result-title {
+                font-size: 1.8em;
+            }
+            
+            .probability-value {
+                font-size: 2.5em;
+            }
+            
+            .result-icon {
+                font-size: 70px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="result-icon">☀️</div>
+        
+        <h1 class="result-title">NO RAIN PREDICTED</h1>
+        
+        <div class="result-description">
+            <p>Based on the weather parameters provided, our machine learning model predicts that <strong>it will NOT rain tomorrow</strong>.</p>
+            <p>Enjoy the beautiful weather!</p>
+        </div>
+        
+        <div class="probability-box">
+            <div class="probability-label">Confidence Level</div>
+            <div class="probability-value">{{ probability }}%</div>
+            <div class="probability-bar">
+                <div class="probability-fill" data-width="{{ probability }}"></div>
+            </div>
+        </div>
+        
+        <div class="comparison-box">
+            <div class="comparison-item">
+                <div class="comparison-item-label">☀️ No Rain Probability</div>
+                <div class="comparison-item-value">{{ probability }}%</div>
+            </div>
+            <div class="comparison-item rain">
+                <div class="comparison-item-label">🌧️ Rain Probability</div>
+                <div class="comparison-item-value">{{ rain_prob }}%</div>
+            </div>
+        </div>
+        
+        <div class="info-banner">
+            <h3>✨ Perfect Day To:</h3>
+            <p>
+                ✓ Plan outdoor activities<br>
+                ✓ Go for a picnic or hike<br>
+                ✓ Play sports or exercises<br>
+                ✓ Wash your car or water plants
+            </p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">🔄 Make Another Prediction</a>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Result</button>
+        </div>
+    </div>
+    <script>
+        const probabilityFill = document.querySelector('.probability-fill');
+        const width = probabilityFill.getAttribute('data-width');
+        probabilityFill.style.width = width + '%';
+    </script>
+</body>
+</html>

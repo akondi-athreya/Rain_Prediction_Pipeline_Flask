@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainfall Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .wind-direction {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .wind-btn {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .wind-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .wind-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌧️ Rainfall Prediction</h1>
+            <p>Enter weather parameters to predict rainfall</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>📍 How to use:</h3>
+            <p>Fill in the weather parameters below and click "Predict" to see if it will rain tomorrow.</p>
+        </div>
+        
+        <form method="POST" action="/predict">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="MinTemp">Minimum Temperature (°C)</label>
+                    <input type="number" id="MinTemp" name="MinTemp" step="0.1" required placeholder="e.g., 13.4">
+                </div>
+                <div class="form-group">
+                    <label for="MaxTemp">Maximum Temperature (°C)</label>
+                    <input type="number" id="MaxTemp" name="MaxTemp" step="0.1" required placeholder="e.g., 22.9">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="Rainfall">Rainfall (mm)</label>
+                    <input type="number" id="Rainfall" name="Rainfall" step="0.1" required placeholder="e.g., 0.6">
+                </div>
+                <div class="form-group">
+                    <label for="WindGustSpeed">Wind Gust Speed (km/h)</label>
+                    <input type="number" id="WindGustSpeed" name="WindGustSpeed" step="0.1" required placeholder="e.g., 44">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="WindGustDir">Wind Gust Direction</label>
+                <select id="WindGustDir" name="WindGustDir" required>
+                    <option value="">-- Select Direction --</option>
+                    <option value="N">N (North)</option>
+                    <option value="NNE">NNE</option>
+                    <option value="NE">NE (Northeast)</option>
+                    <option value="ENE">ENE</option>
+                    <option value="E">E (East)</option>
+                    <option value="ESE">ESE</option>
+                    <option value="SE">SE (Southeast)</option>
+                    <option value="SSE">SSE</option>
+                    <option value="S">S (South)</option>
+                    <option value="SSW">SSW</option>
+                    <option value="SW">SW (Southwest)</option>
+                    <option value="WSW">WSW</option>
+                    <option value="W">W (West)</option>
+                    <option value="WNW">WNW</option>
+                    <option value="NW">NW (Northwest)</option>
+                    <option value="NNW">NNW</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="WindDir9am">Wind Direction at 9 AM</label>
+                <select id="WindDir9am" name="WindDir9am" required>
+                    <option value="">-- Select Direction --</option>
+                    <option value="N">N (North)</option>
+                    <option value="NNE">NNE</option>
+                    <option value="NE">NE (Northeast)</option>
+                    <option value="ENE">ENE</option>
+                    <option value="E">E (East)</option>
+                    <option value="ESE">ESE</option>
+                    <option value="SE">SE (Southeast)</option>
+                    <option value="SSE">SSE</option>
+                    <option value="S">S (South)</option>
+                    <option value="SSW">SSW</option>
+                    <option value="SW">SW (Southwest)</option>
+                    <option value="WSW">WSW</option>
+                    <option value="W">W (West)</option>
+                    <option value="WNW">WNW</option>
+                    <option value="NW">NW (Northwest)</option>
+                    <option value="NNW">NNW</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="WindDir3pm">Wind Direction at 3 PM</label>
+                <select id="WindDir3pm" name="WindDir3pm" required>
+                    <option value="">-- Select Direction --</option>
+                    <option value="N">N (North)</option>
+                    <option value="NNE">NNE</option>
+                    <option value="NE">NE (Northeast)</option>
+                    <option value="ENE">ENE</option>
+                    <option value="E">E (East)</option>
+                    <option value="ESE">ESE</option>
+                    <option value="SE">SE (Southeast)</option>
+                    <option value="SSE">SSE</option>
+                    <option value="S">S (South)</option>
+                    <option value="SSW">SSW</option>
+                    <option value="SW">SW (Southwest)</option>
+                    <option value="WSW">WSW</option>
+                    <option value="W">W (West)</option>
+                    <option value="WNW">WNW</option>
+                    <option value="NW">NW (Northwest)</option>
+                    <option value="NNW">NNW</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="WindSpeed9am">Wind Speed at 9 AM (km/h)</label>
+                    <input type="number" id="WindSpeed9am" name="WindSpeed9am" step="0.1" required placeholder="e.g., 20">
+                </div>
+                <div class="form-group">
+                    <label for="WindSpeed3pm">Wind Speed at 3 PM (km/h)</label>
+                    <input type="number" id="WindSpeed3pm" name="WindSpeed3pm" step="0.1" required placeholder="e.g., 24">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="Humidity9am">Humidity at 9 AM (%)</label>
+                    <input type="number" id="Humidity9am" name="Humidity9am" min="0" max="100" step="1" required placeholder="e.g., 71">
+                </div>
+                <div class="form-group">
+                    <label for="Humidity3pm">Humidity at 3 PM (%)</label>
+                    <input type="number" id="Humidity3pm" name="Humidity3pm" min="0" max="100" step="1" required placeholder="e.g., 22">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="Pressure9am">Pressure at 9 AM (hPa)</label>
+                    <input type="number" id="Pressure9am" name="Pressure9am" step="0.1" required placeholder="e.g., 1007.7">
+                </div>
+                <div class="form-group">
+                    <label for="Pressure3pm">Pressure at 3 PM (hPa)</label>
+                    <input type="number" id="Pressure3pm" name="Pressure3pm" step="0.1" required placeholder="e.g., 1007.1">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="Temp9am">Temperature at 9 AM (°C)</label>
+                    <input type="number" id="Temp9am" name="Temp9am" step="0.1" required placeholder="e.g., 16.9">
+                </div>
+                <div class="form-group">
+                    <label for="Temp3pm">Temperature at 3 PM (°C)</label>
+                    <input type="number" id="Temp3pm" name="Temp3pm" step="0.1" required placeholder="e.g., 21.8">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="RainToday">Did it rain today?</label>
+                <select id="RainToday" name="RainToday" required>
+                    <option value="">-- Select Option --</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">🔮 Predict Tomorrow's Weather</button>
+        </form>
+    </div>
+</body>
+</html>
