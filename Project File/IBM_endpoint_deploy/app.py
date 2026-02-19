@@ -2,23 +2,34 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import numpy as np
 import pickle
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
 # Initialize Flask app
 app = Flask(__name__)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Default values to avoid NameError if loading fails
+model = None
+scaler = None
+imputer = None
+categorical_imputer = None
+label_encoders = {}
+feature_names = []
+
 # Load all saved models and preprocessing objects
 try:
     # Load the trained model
-    model = pickle.load(open('/Users/akondiathreya/Documents/Development/Projects/APSCHE/IBM_endpoint_deploy/rainfall.pkl', 'rb'))
+    model = pickle.load(open(os.path.join(BASE_DIR, 'rainfall.pkl'), 'rb'))
     
     # Load preprocessing objects
-    scaler = pickle.load(open('/Users/akondiathreya/Documents/Development/Projects/APSCHE/IBM_endpoint_deploy/scale.pkl', 'rb'))
-    imputer = pickle.load(open('/Users/akondiathreya/Documents/Development/Projects/APSCHE/IBM_endpoint_deploy/impter.pkl', 'rb'))
-    categorical_imputer = pickle.load(open('/Users/akondiathreya/Documents/Development/Projects/APSCHE/IBM_endpoint_deploy/cat_impter.pkl', 'rb'))
-    label_encoders = pickle.load(open('/Users/akondiathreya/Documents/Development/Projects/APSCHE/IBM_endpoint_deploy/encoder.pkl', 'rb'))
-    feature_names = pickle.load(open('/Users/akondiathreya/Documents/Development/Projects/APSCHE/IBM_endpoint_deploy/feature_names.pkl', 'rb'))
+    scaler = pickle.load(open(os.path.join(BASE_DIR, 'scale.pkl'), 'rb'))
+    imputer = pickle.load(open(os.path.join(BASE_DIR, 'impter.pkl'), 'rb'))
+    categorical_imputer = pickle.load(open(os.path.join(BASE_DIR, 'cat_impter.pkl'), 'rb'))
+    label_encoders = pickle.load(open(os.path.join(BASE_DIR, 'encoder.pkl'), 'rb'))
+    feature_names = pickle.load(open(os.path.join(BASE_DIR, 'feature_names.pkl'), 'rb'))
     
     print("✓ Model and preprocessing objects loaded successfully!")
 except Exception as e:
@@ -42,6 +53,9 @@ def predict():
     Handle prediction requests
     """
     try:
+        if model is None or scaler is None:
+            raise RuntimeError("Model artifacts are not loaded. Please check .pkl files in IBM_endpoint_deploy.")
+
         # Get input data from form
         data = request.form.to_dict()
         
@@ -112,6 +126,9 @@ def api_predict():
     API endpoint for JSON predictions
     """
     try:
+        if model is None or scaler is None:
+            raise RuntimeError("Model artifacts are not loaded. Please check .pkl files in IBM_endpoint_deploy.")
+
         data = request.get_json()
         
         # Create input data
